@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 )
-const jsonFilePath = "workspace/github.com/sebastien-johnson/BDev-Coursework/blog_aggregator/gatorconfig.json"
+const jsonFilePath = ".gatorconfig.json"
 
 type Config struct {
 	Db_url 				string `json:"db_url"`
