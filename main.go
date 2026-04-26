@@ -49,7 +49,8 @@ func main() {
 	//register new user CLI commands
 	cmds.Register("login", handlerLogin)
 	cmds.Register("register", handlerRegister)
-	
+	cmds.Register("reset", handlerReset)
+
 	userArgs := os.Args
 
 	if len(userArgs) < 2 {
