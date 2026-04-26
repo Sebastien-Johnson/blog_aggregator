@@ -50,6 +50,7 @@ func main() {
 	cmds.Register("login", handlerLogin)
 	cmds.Register("register", handlerRegister)
 	cmds.Register("reset", handlerReset)
+	cmds.Register("users", handlerUsers)
 
 	userArgs := os.Args
 
