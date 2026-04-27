@@ -127,7 +127,14 @@ func handlerAddFeed(s *state, cmd command) error {
 	userId := userData.ID
 
 	//create feed with params struct
-	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{Name: name, UserID: userId, Url: url})
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    userId,
+		Name:      name,
+		Url:       url,
+	})
 	if err != nil {
 		return fmt.Errorf("Could not create feed: %w", err)
 	}
@@ -138,5 +145,14 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Println("Name:", feed.Name)
 	fmt.Println("Url:", feed.Url)
 	fmt.Println("User ID:", feed.UserID)
+	return nil
+}
+
+func handlerFeeds(s *state, cmd command) error {
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return err
+	}
+	fmt.Print(feeds)
 	return nil
 }
