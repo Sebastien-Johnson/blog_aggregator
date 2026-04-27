@@ -21,3 +21,8 @@ SQLC
 
 Postgres driver
 - Shows program how to talk to db
+
+RSS Feed
+- "Really Simple Syndication" 
+- A way to get the latest content from a website in a structured format (XML)
+- XML is unmarshalled into structs

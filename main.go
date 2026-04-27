@@ -20,6 +20,7 @@ type state struct{
 }
 
 
+
 func main() {
 	//Creates user from reading cfg file
 	cfg, err := config.Read()
@@ -51,6 +52,8 @@ func main() {
 	cmds.Register("register", handlerRegister)
 	cmds.Register("reset", handlerReset)
 	cmds.Register("users", handlerUsers)
+	cmds.Register("agg", handlerAgg)
+	cmds.Register("addfeed", handlerAddFeed)
 
 	userArgs := os.Args
 
