@@ -48,13 +48,15 @@ func main() {
 	}
 	
 	//register new user CLI commands
-	cmds.Register("login", handlerLogin)
 	cmds.Register("register", handlerRegister)
+	cmds.Register("login", handlerLogin)
 	cmds.Register("reset", handlerReset)
 	cmds.Register("users", handlerUsers)
 	cmds.Register("agg", handlerAgg)
 	cmds.Register("addfeed", handlerAddFeed)
-	cmds.Register("feeds", handlerFeeds)
+	cmds.Register("feeds", handlerListFeeds)
+	cmds.Register("follow", handlerFollow)
+	cmds.Register("following", handlerFollowing)
 
 	userArgs := os.Args
 

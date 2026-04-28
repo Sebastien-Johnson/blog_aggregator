@@ -7,7 +7,6 @@ import (
 	"time"
 	"github.com/Sebastien-Johnson/blog_aggregator/internal/database"
 	"github.com/google/uuid"
-	"errors"
 )
 
 //Users set user to update state with new user config
@@ -109,50 +108,3 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
-	if len(cmd.args) != 2 {
-    	return errors.New("Not enough arguments submitted")
-	}
-	name := cmd.args[0]
-	url := cmd.args[1]
-
-	//get current username
-	currentUser := s.cfg.Current_user_name
-	//get current user data
-	userData, err := s.db.GetUser(context.Background(), currentUser)
-	if err != nil {
-		return fmt.Errorf("Could not fecth user: %w", err)
-	}
-	//grab user id
-	userId := userData.ID
-
-	//create feed with params struct
-	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		UserID:    userId,
-		Name:      name,
-		Url:       url,
-	})
-	if err != nil {
-		return fmt.Errorf("Could not create feed: %w", err)
-	}
-	
-    fmt.Println("ID:", feed.ID)
-	fmt.Println("Created At:", feed.CreatedAt)
-	fmt.Println("Updated At:", feed.UpdatedAt)
-	fmt.Println("Name:", feed.Name)
-	fmt.Println("Url:", feed.Url)
-	fmt.Println("User ID:", feed.UserID)
-	return nil
-}
-
-func handlerFeeds(s *state, cmd command) error {
-	feeds, err := s.db.GetFeeds(context.Background())
-	if err != nil {
-		return err
-	}
-	fmt.Print(feeds)
-	return nil
-}

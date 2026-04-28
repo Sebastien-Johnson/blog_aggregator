@@ -26,3 +26,22 @@ RSS Feed
 - "Really Simple Syndication" 
 - A way to get the latest content from a website in a structured format (XML)
 - XML is unmarshalled into structs
+
+'Many to Many' unique constrain ex:
+CREATE TABLE product_suppliers (
+  product_id INTEGER,
+  supplier_id INTEGER,
+  UNIQUE(product_id, supplier_id),
+  FOREIGN KEY (product_id) REFERENCES products (id),
+  FOREIGN KEY (supplier_id) REFERENCES suppliers (id)
+);
+
+
+SELECT
+    feed_follows.*,
+    <something>.name AS feed_name,
+    <something>.name AS user_name
+FROM feed_follows
+INNER JOIN <table> ON <feed_follows column> = <table column>
+INNER JOIN <table> ON <feed_follows column> = <table column>
+WHERE <which column> = $1;
