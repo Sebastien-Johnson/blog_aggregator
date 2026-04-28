@@ -9,21 +9,12 @@ import (
 	"github.com/Sebastien-Johnson/blog_aggregator/internal/database"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
-	//get current username
-	//get current user data
-	user, err := s.db.GetUser(context.Background(), s.cfg.Current_user_name)
-	if err != nil {
-		return fmt.Errorf("Could not fecth user: %w", err)
-	}
-
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
     	return errors.New("Not enough arguments submitted")
 	}
 	name := cmd.args[0]
 	url := cmd.args[1]
-
-
 
 	//create feed with params struct
 	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{

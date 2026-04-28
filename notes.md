@@ -45,3 +45,7 @@ FROM feed_follows
 INNER JOIN <table> ON <feed_follows column> = <table column>
 INNER JOIN <table> ON <feed_follows column> = <table column>
 WHERE <which column> = $1;
+
+
+Middleware
+- A way to wrap a function with additional functionality. It is a common pattern that allows us to write DRY code.

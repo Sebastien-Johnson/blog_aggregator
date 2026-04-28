@@ -1,6 +1,10 @@
 package main
 
-import "errors"
+import (
+	"errors"
+
+)
+
 //holds params for single command
 type command struct{
 	name string //ex: 'login'

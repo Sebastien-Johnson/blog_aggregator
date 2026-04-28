@@ -2,18 +2,13 @@ package main
 
 import (
 	"context"
-	"time"
 	"fmt"
-	"github.com/google/uuid"
+	"time"
 	"github.com/Sebastien-Johnson/blog_aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
-func handlerFollow(s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), s.cfg.Current_user_name)
-	if err != nil {
-		return err
-	}
-
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <feed_url>", cmd.name)
 	}
@@ -39,12 +34,7 @@ func handlerFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
-	user, err := s.db.GetUser(context.Background(), s.cfg.Current_user_name)
-	if err != nil {
-		return err
-	}
-	
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	userFollows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 	if err != nil {
 		return err
@@ -59,5 +49,23 @@ func handlerFollowing(s *state, cmd command) error {
 	for _, follow := range userFollows {
 		fmt.Printf("* %s\n", follow.FeedName)
 	}
+	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	feedUrl := cmd.args[0] 
+	feed, err := s.db.GetFeedsByUrl(context.Background(), feedUrl)
+
+	if err != nil {
+		return fmt.Errorf("Unable to find feed: %w", err)
+	}
+	err = s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams{
+		UserID: feed.UserID,
+    	FeedID: feed.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("Unable to find follow: %w", err)
+	}
+	fmt.Print("Unfollowed!")
 	return nil
 }
