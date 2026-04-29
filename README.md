@@ -13,9 +13,11 @@ go install https://github.com/Sebastien-Johnson/blog_aggregator
 
 Setting up config file
 - Setup json file in home directory '~/.gatorconfig.json'
+
 {
   "db_url": "postgres://example"
 }
+
 - Export a config struct representing this file structure
 - Create a config.go file in internal/config within your project root and export to main
 - Export a Read function to read the gatorconfig file and convert it to a config struct
