@@ -7,6 +7,7 @@ import (
 	"time"
 	"github.com/Sebastien-Johnson/blog_aggregator/internal/database"
 	"github.com/google/uuid"
+	"errors"
 )
 
 //Users set user to update state with new user config
@@ -100,11 +101,24 @@ func printUser(user database.User) {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
-	if err != nil {
-		return err
+	if len(cmd.args) != 1 {
+		return errors.New("Agg requires one argument")
 	}
-	fmt.Printf("Feed: %+v\n", feed)
-	return nil
+	time_between_req := cmd.args[0]
+	timeBetween, err := time.ParseDuration(time_between_req)
+	if err != nil {
+		return fmt.Errorf("Unable to parse time input: %w", err)
+	}
+	fmt.Printf("Collecting feeds every %s\n", timeBetween)
+
+	ticker := time.NewTicker(timeBetween)
+	defer ticker.Stop()
+	for ; ; <-ticker.C {
+		fmt.Println("Scraping...")
+		err := scrapeFeeds(s)
+		if err != nil {
+			fmt.Printf("Unable to scrape feed: %v\n", err)
+		}
+	}
 }
 

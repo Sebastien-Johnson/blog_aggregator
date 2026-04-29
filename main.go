@@ -59,6 +59,8 @@ func main() {
 	cmds.Register("following", middlewareLoggedIn(handlerFollowing))
 	cmds.Register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	cmds.Register("unfollow", middlewareLoggedIn(handlerUnfollow))
+	cmds.Register("browse", middlewareLoggedIn(handlerBrowse))
+
 
 	userArgs := os.Args
 

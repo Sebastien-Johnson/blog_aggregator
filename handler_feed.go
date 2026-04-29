@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/google/uuid"
+	"database/sql"
 	"errors"
+	"fmt"
+	"strconv"
 	"time"
+	"strings"
+	"log"
 	"github.com/Sebastien-Johnson/blog_aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
@@ -26,7 +30,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		Url:       url,
 	})
 	if err != nil {
-		return fmt.Errorf("Could not create feed: %w", err)
+		return fmt.Errorf("Could not create feed: %w\n", err)
 	}
 	feedFollow, err := s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
 		ID:        uuid.New(),
@@ -36,7 +40,7 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		FeedID:    feed.ID,
 	})
 	if err != nil {
-		return fmt.Errorf("User unable to follow feed: %w", err)
+		return fmt.Errorf("User unable to follow feed: %w\n", err)
 	}
 	fmt.Println("Feed created successfully:")
 	printFeed(feed, user)
@@ -62,7 +66,7 @@ func handlerListFeeds(s *state, cmd command) error {
 	for _, feed := range feeds {
 		user, err := s.db.GetUserById(context.Background(), feed.UserID)
 		if err != nil {
-			return fmt.Errorf("couldn't get user: %w", err)
+			return fmt.Errorf("couldn't get user: %w\n", err)
 		}
 		printFeed(feed, user)
 	}
@@ -81,4 +85,69 @@ func printFeed(feed database.Feed, user database.User) {
 func printFeedFollow(username, feedname string) {
 	fmt.Printf("* User:          %s\n", username)
 	fmt.Printf("* Feed:          %s\n", feedname)
+}
+
+func scrapeFeeds(s *state) error {
+	nextFeed, err := s.db.GetNextFeedToFetch(context.Background())
+	if err != nil {
+		return fmt.Errorf("Unable to locate next feed: %w\n", err)
+	}
+
+	err = s.db.MarkFeedFetched(context.Background(), nextFeed.ID)
+	if err != nil {
+		return fmt.Errorf("Unable to mark feed as fetch: %w\n", err)
+	}
+
+	rssFeed, err := fetchFeed(context.Background(), nextFeed.Url)
+
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve next feed: %w\n", err)
+	}
+
+	for _,item := range rssFeed.Channel.Item {
+		publishDate := sql.NullTime{}
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+    		publishDate = sql.NullTime{Time: t, Valid: true}
+		}
+		_, err = s.db.CreatPost(context.Background(), database.CreatPostParams{
+			ID:        		uuid.New(),
+			CreatedAt: 		time.Now().UTC(),
+			UpdatedAt: 		time.Now().UTC(),
+			Title:       	item.Title,
+			Url:         	item.Link,
+			Description: 	sql.NullString{String: item.Description, Valid: true},
+			PublishedAt: 	publishDate,
+			FeedID:      	nextFeed.ID,
+	})
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			}
+			log.Printf("Couldn't create post: %v", err)
+    		continue
+		}
+	}
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error{
+	limit := 0
+
+	if len(cmd.args) == 0 {
+		limit = 2
+	} else {
+		i, err := strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return fmt.Errorf("Argument must be number: %w", err)
+		}
+		limit = i
+	}
+	posts, err := s.db.GetPostForUser(context.Background(), int32(limit))
+	if err != nil {
+		return fmt.Errorf("Unable to retrieve post: %w", err)
+	}
+	for _, post := range posts {
+		fmt.Println(post)
+	}
+	return nil
 }
